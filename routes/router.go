@@ -3,6 +3,7 @@ package routes
 import (
 	"github.com/gin-gonic/gin"
 	"gogogo/api"
+	"gogogo/middleware"
 )
 
 func NewRouter() *gin.Engine {
@@ -15,6 +16,13 @@ func NewRouter() *gin.Engine {
 		})
 		v1.POST("user/register", api.UserRegister)
 		v1.POST("user/login", api.UserLogin)
+
+		authed := v1.Group("/")
+		authed.Use(middleware.JWT())
+		{
+			authed.POST("task", api.CreateTask)
+			authed.GET("tasks", api.ListTasks)
+		}
 	}
 
 	return r

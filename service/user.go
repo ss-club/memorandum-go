@@ -3,6 +3,7 @@ package service
 import (
 	"gogogo/model"
 	"gogogo/serializer"
+	"gogogo/utils"
 	"gorm.io/gorm"
 )
 
@@ -43,14 +44,14 @@ func (service *UserService) Register() *serializer.Response {
 
 func (service *UserService) Login() serializer.Response {
 	var user model.User
-	if err := model.DB.Where("user_name", service.UserName).First(&user).Error; err != nil {
+	if err := model.DB.Where("username", service.UserName).First(&user).Error; err != nil {
 		if err.Error() == gorm.ErrRecordNotFound.Error() {
 			return serializer.Response{
 				Status: 404,
 				Msg:    "未找到用户",
 			}
 		}
-		println(err)
+
 		return serializer.Response{
 			Status: 404,
 			Msg:    "未找到用户其它错误",
@@ -58,11 +59,22 @@ func (service *UserService) Login() serializer.Response {
 	}
 
 	if !user.CheckPassword(service.Password) {
-		return serializer.Response{Status: 500, Msg: "密码验证错误"}
+		return serializer.Response{Status: 400, Msg: "密码核验未通过"}
+	}
+
+	token, err := utils.GenerateToken(user.ID, user.Username, 0)
+
+	if err != nil {
+		return serializer.Response{
+			Status: 500,
+			Msg:    "token生成错误",
+			Data:   err.Error(),
+		}
 	}
 
 	return serializer.Response{
 		Status: 200,
 		Msg:    "登录成功",
+		Data:   serializer.TokenData{User: serializer.BuildUser(user), Token: token},
 	}
 }
