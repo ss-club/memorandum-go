@@ -93,17 +93,19 @@ func DeleteTask(id string) serializer.Response {
 func (service *CreateTask) UpdateTask(id string) serializer.Response {
 	var task model.Task
 	model.DB.Model(model.Task{}).Where("id = ?", id).First(&task)
-	task.Content = service.Content
-	task.Status = service.Status
-	task.Title = service.Title
+	err := model.DB.Model(&task).Updates(model.Task{Title: service.Title, Content: service.Content, Status: service.Status}).Error
+	//task.Content = service.Content
+	//task.Status = service.Status
+	//task.Title = service.Title
 
-	err := model.DB.Save(&task).Error
+	//err := model.DB.Save(&task).Error
 
 	if err != nil {
 		return serializer.Response{
 			Status: 500,
 			Msg:    "数据库更新出错",
-			Error:  err.Error(),
+			//Error:  id,
+			Data: string(id),
 		}
 	}
 

@@ -31,7 +31,7 @@ func DeleteTask(c *gin.Context) {
 func UpdateTask(c *gin.Context) {
 	updateService := service.CreateTask{}
 	if err := c.ShouldBind(&updateService); err == nil {
-		res := updateService.UpdateTask(c.Param("id"))
+		res := updateService.UpdateTask(c.PostForm("id"))
 		c.JSON(200, res)
 	} else {
 		c.JSON(404, "参数错误")
