@@ -63,3 +63,53 @@ func ListTasks(id uint) serializer.Response {
 	}
 
 }
+
+func DeleteTask(id string) serializer.Response {
+	var task model.Task
+	err := model.DB.Model(model.Task{}).Where("id = ?", id).First(&task).Error
+	if err != nil {
+		return serializer.Response{
+			Status: 500,
+			Msg:    "删除查询出错",
+			Error:  err.Error(),
+		}
+
+	}
+	err = model.DB.Delete(&task).Error
+	if err != nil {
+		return serializer.Response{
+			Status: 500,
+			Msg:    "删除错误",
+			Error:  err.Error(),
+		}
+	}
+
+	return serializer.Response{
+		Status: 200,
+		Msg:    "删除成功",
+	}
+}
+
+func (service *CreateTask) UpdateTask(id string) serializer.Response {
+	var task model.Task
+	model.DB.Model(model.Task{}).Where("id = ?", id).First(&task)
+	task.Content = service.Content
+	task.Status = service.Status
+	task.Title = service.Title
+
+	err := model.DB.Save(&task).Error
+
+	if err != nil {
+		return serializer.Response{
+			Status: 500,
+			Msg:    "数据库更新出错",
+			Error:  err.Error(),
+		}
+	}
+
+	return serializer.Response{
+		Status: 200,
+		Msg:    "更新成功",
+		Data:   task,
+	}
+}

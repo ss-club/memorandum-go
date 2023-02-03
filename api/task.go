@@ -22,3 +22,18 @@ func ListTasks(c *gin.Context) {
 	res := service.ListTasks(claim.Id)
 	c.JSON(200, res)
 }
+
+func DeleteTask(c *gin.Context) {
+	res := service.DeleteTask(c.Param("id"))
+	c.JSON(200, res)
+}
+
+func UpdateTask(c *gin.Context) {
+	updateService := service.CreateTask{}
+	if err := c.ShouldBind(&updateService); err == nil {
+		res := updateService.UpdateTask(c.Param("id"))
+		c.JSON(200, res)
+	} else {
+		c.JSON(404, "参数错误")
+	}
+}
